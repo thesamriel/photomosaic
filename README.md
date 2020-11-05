@@ -4,7 +4,7 @@ A Python script to turn a target image into a mosaic consisting of multiple othe
 ### Prerequisites
 
 ```
-pip install scikit-image PIL
+pip install scikit-image
 ```
 
 Tested with:
