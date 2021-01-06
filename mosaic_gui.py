@@ -1,35 +1,14 @@
 from pathlib import Path
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance, ImageTk
 import skimage
 from skimage import img_as_float
 from skimage.metrics import mean_squared_error, structural_similarity
 import numpy as np
 from multiprocessing import Pool, cpu_count
 import random
-
-# Size of the high res mosaic: out_img = ENLARGEMENT * target_img
-ENLARGEMENT = 11
-# Maximum number of used tiles in the mosaic
-NUM_TILES = 2000
-# Maximum number each image can be used in the mosaic
-MAX_REPETITION = 4
-# Float between 0 and 1, how much the original image is blended over the mosaic
-# negative number leads to automatic calculation of reasonable blend factor
-BLEND_FACTOR = 0.15
-# Integer in [0-5]. How much the image may be altered by enhancing color, brightness and contrast. 0 is no modification allowed.
-MODIFICATION = 2
-
-# Tile Format as (width, height). (1,1) is quadratic tiles
-TILE_RATIO = (1, 1)
-
-# Relative paths to the images
-TARGET_PATH = "target/kiss5.jpg"
-SOURCE_FOLDER = "wedding"
-SAVE_PATH = "4to3.png"
-
-
-
-
+import tkinter as tk
+import tkinter.filedialog
+import configparser
 
 
 def rmse_imgs(img1, img2):
@@ -289,17 +268,48 @@ class TileLoader():
 
 
 
+
+
 if __name__ == "__main__":
+
+    config = configparser.ConfigParser()
+    config.read('mosaic_config.txt')
+    ENLARGEMENT = float(config['Settings']["Enlargement"])
+    NUM_TILES = int(config['Settings']['Number of tiles'])
+    MAX_REPETITION = int(config['Settings']['Maximum number of repetitions'])
+    BLEND_FACTOR = float(config['Settings']['Blending factor'])
+    MODIFICATION = int(config['Settings']['Modification factor'])
+    TILE_RATIO = tuple(int(x) for x in config['Settings']['Tile ratio'].split(':'))
+    PERFORMANCE = int(config['Settings']['Performance'])
+    print(TILE_RATIO)
+
+    root = tk.Tk()
+    root.withdraw()
+
+    TARGET_PATH = tk.filedialog.askopenfilename(title='Select target image', 
+            filetypes=[("image", ".jpeg"),
+                        ("image", ".png"),
+                        ("image", ".jpg"),
+                        ("image", ".JPG")])
+    SOURCE_FOLDER = tk.filedialog.askdirectory(title="Select folder with images")
+
+
+
+
+
     Image.MAX_IMAGE_PIXELS = None
     target_path = Path(TARGET_PATH)
     source_path = Path(SOURCE_FOLDER)
 
-    target_tiled = TiledImage(target_path, source_path, tile_format=TILE_RATIO, blend_factor=BLEND_FACTOR, max_rep=MAX_REPETITION, enlargement=4, max_tiles=NUM_TILES)
+    target_tiled = TiledImage(target_path, source_path, tile_format=TILE_RATIO, blend_factor=BLEND_FACTOR, max_rep=MAX_REPETITION, enlargement=PERFORMANCE, max_tiles=NUM_TILES)
     target_tiled.fit_transform(modify=MODIFICATION)
-    target_tiled.create_high_res(ENLARGEMENT)
+    preview = target_tiled.image
+    preview = preview.resize((int(preview.width/PERFORMANCE), int(preview.height/PERFORMANCE)), Image.ANTIALIAS)
+    preview.show()
 
-
-    # target_tiled.image.show()
-    target_tiled.save(SAVE_PATH)
+    SAVE_PATH = tk.filedialog.asksaveasfilename(title="Save mosaic image", filetypes=[("PNG", ".png")])
+    if SAVE_PATH:
+        target_tiled.create_high_res(ENLARGEMENT)
+        target_tiled.save(SAVE_PATH)
 
 

@@ -1,0 +1,22 @@
+[Settings]
+# Size of the high resolution mosaic: out_img = ENLARGEMENT * target_img
+Enlargement = 10
+
+# Maximum number of used tiles in the mosaic
+Number of tiles = 1000
+
+# Maximum number each image can be used in the mosaic
+Maximum number of repetitions = 4
+
+# Float between 0 and 1, how much the original image is blended over the mosaic
+# negative number leads to automatic calculation of reasonable blend factor
+Blending factor = 0.15
+
+# Integer in [0-5]. How much the image may be altered by enhancing color, brightness and contrast. 0 is no modification allowed.
+Modification factor = 0
+
+# Tile Format as (width, height). (1,1) is quadratic tiles
+Tile ratio = 1:1
+
+# Performance Setting. 1 is fastest, 10 is slowest with possibly best fitting
+Performance = 2
